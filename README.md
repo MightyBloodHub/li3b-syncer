@@ -1,1 +1,0 @@
-# li3b-syncer
