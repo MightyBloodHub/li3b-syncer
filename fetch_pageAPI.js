@@ -1,7 +1,7 @@
 const puppeteer = require('puppeteer');
 const express = require('express');
 const app = express();
-const port = 3000;
+const port = 80;
 
 app.get('/fetch-venue-data', async (req, res) => {
   const venue_code = req.query.venue_code;
