@@ -1,7 +1,15 @@
 const puppeteer = require('puppeteer');
 const express = require('express');
 const app = express();
-const port = 80;
+const port = 3000;
+
+function isTimeslotAvailable(data, timeSlot) {
+  const targetSlot = data.find(slot => slot.content === timeSlot);
+  if (targetSlot) {
+    return targetSlot.attributes.disabled === undefined;
+  }
+  return false;
+}
 
 app.get('/fetch-venue-data', async (req, res) => {
   const venue_code = req.query.venue_code;
@@ -11,6 +19,25 @@ app.get('/fetch-venue-data', async (req, res) => {
     return res.status(400).send({ error: 'Both venue_code and venue_date are required.' });
   }
 
+  const elementsData = await getVenueData(venue_code, venue_date);
+  res.send(elementsData);
+});
+
+app.get('/is-timeslot-available', async (req, res) => {
+  const venue_code = req.query.venue_code;
+  const venue_date = req.query.venue_date;
+  const timeSlot = req.query.timeSlot;
+
+  if (!venue_code || !venue_date || !timeSlot) {
+    return res.status(400).send({ error: 'venue_code, venue_date, and timeSlot are required.' });
+  }
+
+  const elementsData = await getVenueData(venue_code, venue_date);
+  const result = isTimeslotAvailable(elementsData, timeSlot);
+  res.send({ available: result });
+});
+
+async function getVenueData(venue_code, venue_date) {
   const your_url = `https://www.li3ib.com/en-kw/venues/${venue_code}?date=${venue_date}`;
   const browser = await puppeteer.launch({ headless: true });
   const page = await browser.newPage();
@@ -25,7 +52,7 @@ app.get('/fetch-venue-data', async (req, res) => {
   } catch (error) {
     console.log('Failed to find the elements:', error);
     await browser.close();
-    return res.status(500).send({ error: 'Failed to find the elements.' });
+    throw new Error('Failed to find the elements.');
   }
 
   const elements = await page.$$('.venue__timeslot');
@@ -43,8 +70,8 @@ app.get('/fetch-venue-data', async (req, res) => {
   }
 
   await browser.close();
-  res.send(results);
-});
+  return results;
+}
 
 app.listen(port, () => {
   console.log(`API listening at http://localhost:${port}`);
