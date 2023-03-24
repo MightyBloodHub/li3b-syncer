@@ -4,11 +4,6 @@ const app = express();
 // ...
 const port = process.env.PORT || 3000;
 
-// ...
-
-
-
-
 function isTimeslotAvailable(data, timeSlot) {
   const targetSlot = data.find(slot => slot.content === timeSlot);
   if (targetSlot) {
@@ -45,7 +40,13 @@ app.get('/is-timeslot-available', async (req, res) => {
 
 async function getVenueData(venue_code, venue_date) {
   const your_url = `https://www.li3ib.com/en-kw/venues/${venue_code}?date=${venue_date}`;
-  const browser = await puppeteer.launch({ headless: true });
+  const browser = await puppeteer.launch({
+  headless: true,
+  args: [
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+  ],
+});
   const page = await browser.newPage();
 
   await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36');
