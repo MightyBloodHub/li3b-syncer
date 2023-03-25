@@ -1,6 +1,7 @@
 const puppeteer = require('puppeteer');
 const express = require('express');
 const app = express();
+const host = '0.0.0.0';
 const port = 3000;
 
 function isTimeslotAvailable(data, timeSlot) {
@@ -73,6 +74,8 @@ async function getVenueData(venue_code, venue_date) {
   return results;
 }
 
-app.listen(port, () => {
-  console.log(`API listening at http://localhost:${port}`);
+
+
+app.listen(port, host, () => {
+  console.log(`API listening at http://${host}:${port}`);
 });
